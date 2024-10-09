@@ -22,16 +22,17 @@ class CommandTests(SimpleTestCase):
         call_command("wait_for_db")
         patched_check.assert_called_once_with(databases=["default"])
 
-    # Usually there is a sleep interval between each time database is called for tests
-    # This is useful in production but in testing, it slows test down so we remove it
+    # Usually there is a sleep interval each time database is called
+    # This is useful in production
+    # However in testing , it slows test down so we remove it
     @patch("time.sleep")
     def test_wait_for_db_delay(self, patched_sleep, patched_check):
         """Test Waiting for database when getting OperationalError"""
-        # Checks if db is operational, 2 times psycog2Error is called to check if postgres is initialized
+        # 2 times psycog2Error is called to check if postgres is initialized
         # and 3 times OperationalError is called to check if devdb is created
         # in 6th time, True returns db successfully launched
-        patched_check.side_effect = [Psycog2Error] * 2 + [OperationalError] * 3 + [True]
-        print("Delay")
+        patched_check.side_effect = [Psycog2Error] * 2 + \
+            [OperationalError] * 3 + [True]
         call_command("wait_for_db")
 
         # 6 times patched_check is called, 2+3+1
