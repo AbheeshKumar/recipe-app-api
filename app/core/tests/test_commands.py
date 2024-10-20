@@ -34,7 +34,6 @@ class CommandTests(SimpleTestCase):
         patched_check.side_effect = [Psycog2Error] * 2 + \
             [OperationalError] * 3 + [True]
         call_command("wait_for_db")
-
         # 6 times patched_check is called, 2+3+1
         self.assertEqual(patched_check.call_count, 6)
         patched_check.assert_called_with(databases=["default"])
