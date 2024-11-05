@@ -12,25 +12,32 @@ WORKDIR /app
 EXPOSE 8000
 
 ARG DEV=false
+
+RUN sed -i 's/https/http/g' /etc/apk/repositories
+
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
-    apk add --update --no-cache postgresql-client && \
+    apk add --update --no-cache postgresql-client jpeg-dev && \
     #Creates a virtual dependency package that can be deleted later
     apk add --update --no-cache --virtual .tmp-build-deps \
-    build-base postgresql-dev musl-dev && \
+        build-base postgresql-dev musl-dev zlib zlib-dev  && \
     /py/bin/pip install -r /tmp/requirements.txt && \
     if [ $DEV = "true" ]; \
     then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
-    fi && \ 
+    fi && \
     #Remove additional dependencies
     rm -rf /tmp && \
     apk del .tmp-build-deps && \
     #Creates a new user so root user is not the only user available
     #root user has full access to image and that account could be compromised
     adduser \
-    --disabled-password \
-    --no-create-home \
-    django-user
+        --disabled-password \
+        --no-create-home \
+        django-user && \
+    mkdir -p /vol/web/media && \
+    mkdir -p /vol/web/static/ && \
+    chmod -R django-user:django-user /vol && \
+    chmod -R 755 /vol
 
 ENV PATH="/py/bin:$PATH"
 
