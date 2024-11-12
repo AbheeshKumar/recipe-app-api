@@ -14,14 +14,12 @@ EXPOSE 8000
 
 ARG DEV=false
 
-RUN sed -i 's/https/http/g' /etc/apk/repositories
-
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
-    apk add --update --no-cache postgresql-client jpeg-dev linux-headers && \
+    apk add --update --no-cache postgresql-client jpeg-dev && \
     #Creates a virtual dependency package that can be deleted later
     apk add --update --no-cache --virtual .tmp-build-deps \
-        build-base postgresql-dev musl-dev zlib zlib-dev  && \
+        build-base postgresql-dev musl-dev zlib zlib-dev linux-headers && \
     /py/bin/pip install -r /tmp/requirements.txt && \
     if [ $DEV = "true" ]; \
     then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
@@ -36,7 +34,7 @@ RUN python -m venv /py && \
         --no-create-home \
         django-user && \
     mkdir -p /vol/web/media && \
-    mkdir -p /vol/web/static/ && \
+    mkdir -p /vol/web/static && \
     chown -R django-user:django-user /vol && \
     chmod -R 755 /vol && \
     chmod -R +x /scripts
